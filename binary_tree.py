@@ -1,34 +1,4 @@
-from minimax import *
-# class Node:
-#     def __init__(self, value, board):
-#         self.left = None
-#         self.right = None
-#         self.value = 99
-#         self.movement = []
-#         self.children = [self.left, self.right]
-    
-#     # def insert_children(self):
-#     #     self.left = Node()
-#     #     self.right = Node()
-
-#     # def change_node_value(self, value):
-#     #     self.value = value
-    
-#     # def set_value(self, value, state):
-#     #     self.value = value
-#     #     self.state = state
-
-#     def fill(self, score, movement):
-#         for node in self.children:
-#             node.fill(score, movement)
-
-#     def PrintNode(self):
-#         if self.left:
-#             self.left.PrintNode()
-#         print(self.value),
-#         if self.right:
-#             self.right.PrintNode()
-
+from minimax import value_node, is_game_over
 class Node:
     def __init__(self):
         # left = None
@@ -43,39 +13,40 @@ class Node:
             right = Node()
             self.children= [left, right]
         else:
-            self.children = []
+            self.children = None
 
-    def fill(self, score, board, player, depth):
-        for node in self.children:
-            score, movement, new_board = value_node(board, not player)
-            self.value = score
-            self.movement = movement
-            node.fill(score, new_board, not player, depth -1)
-            if depth != 0:
-                node.create_children(depth-1)
+    def fill(self, board, player, depth):
+        
+        if not is_game_over(board):
+            # print('fill\n', board)
+            for node in self.children:
+                if not is_game_over(board):
+                    score, movement, new_board = value_node(board, player)
+                    self.value = score
+                    self.movement = movement
+                    
+                    if depth > 0:
+                        node.create_children(depth-1)
+                    if node.children != None:
+                        node.fill(new_board, not player, depth -1)
         return self.children
 
-    def PrintNode(self, height):
+    def get_score(self):
+        return self.value
+
+    def set_move(self, score, movement):
+        self.value = score
+        self.movement = movement
+
+    def PrintNode(self):
         print(self.value)
-        if height != 0:
-            self.create_children(height-1)
-            if self.children != None:
-                for node in self.children:
-                    node.PrintNode(height-1)
-
-# class Tree:
-#     def __init__(self, height):
-#         self.nodes = []
-#         self.height = height
-#         self.nodes.append(Node()) # insert root node 
+        # if height != 0:
+        #     self.create_children(height-1)
+        if self.children != None:
+            for node in self.children:
+                node.PrintNode()
     
-#     def fill_tree(self, level):
-#         if level == self.height+1: return 
-#         for node in self.nodes:
-#             self.nodes.append(node)
-#             node.insert_children()
-#         self.fill_tree(level+1)
-    
-#     def print_tree(self):
-#         self.nodes[0].PrintNode()
-
+    def toString(self):
+        return '\tvalue: ' + str(self.value) + '\tmovement: ' + str(self.movement)\
+            + '\n\t\tleft child value: ' + str(self.children[0].value) + '\tleft child mov: ' + str(self.children[0].movement)\
+            + '\n\t\tright child value: ' + str(self.children[1].value) + '\tright child mov: ' + str(self.children[1].movement)
