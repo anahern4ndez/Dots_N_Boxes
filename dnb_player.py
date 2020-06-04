@@ -1,16 +1,14 @@
 
 # HOST = '3.12.129.126'  # Standard loopback interface address ---- server samuel
-# HOST = '3.17.150.215'  # Standard loopback interface address
 HOST = 'localhost'  # Standard loopback interface address
 PORT = 4000        # Port to listen on (non-privileged ports are > 1023)
-# PORT = 9000
-# USERNAME = 'ana 2'
 USERNAME = input('username: ')
-TOURNAMENT_ID = 1
+TOURNAMENT_ID = 4000
 
 CURRENT_GAME_ID = -1
 PLAYER_TURN_ID = -1 # maximizer = 1; minimizer = 2
 
+# minimax constants
 TREE_DEPTH = 10
 NEGATIVE_INF = float('-inf')
 POSITIVE_INF = float('inf')
@@ -20,49 +18,38 @@ import random
 from minimax import *
 from binary_tree import *
 
-
+# Método de algoritmo minimax con poda alfabeta y K look ahead
 # state: current node
 # depth: tree height (amount of look ahead)
 # alpha: pruning limit for maximizing player
 # beta:  pruning limit for minimizing player
 # current_board: board of current state  
+# pseudoalgoritmo obtenido de https://www.youtube.com/watch?v=l-hh51ncgDI
 def minimax(state, depth, alpha, beta, maximizingPlayer, current_board):
-    # current_board = board
     if is_game_over(current_board) or depth == 0 or len(state.__dict__['children']) == 0:
-        # print('state value: ', state.value)
-        # print('state children: ', state.children)
-        # print(state.toString())
         return state
 
-    tree = state.fill(current_board, maximizingPlayer, depth-1)
-    # print('tree')
-    # print(tree)
-    # print('maxplayer: ', maximizingPlayer)
+    tree = state.fill(current_board, maximizingPlayer, depth-1) # crear el árbol de nodos llenos con scores y movements
     if maximizingPlayer:
         maxEval = NEGATIVE_INF
         for child in tree:
             evaluation = minimax(child, depth-1, alpha, beta, True, current_board)
-            # print(evaluation.toString())
             maxEval = max(maxEval, evaluation.get_score())
             alpha = max(alpha, evaluation.get_score())
             if beta <= alpha:
                 break
             child.set_move(maxEval, evaluation.__dict__['movement'])
-            # print(child.toString())
             return child
     else:
         minEval = POSITIVE_INF
         for child in tree:
             evaluation = minimax(child, depth-1, alpha, beta, False, current_board)
-            # print(evaluation.toString())
             minEval = min(minEval, evaluation.get_score())
             beta = min(beta, evaluation.get_score())
             if beta <= alpha:
                 break
             child.set_move(minEval, evaluation.__dict__['movement'])
-            # print(child.toString())
             return child
-
 
 
 # conexión y mensajería cliente-server
@@ -122,5 +109,4 @@ def disconnect():
     print('Disconnected from server')
 
 sio.connect('http://'+ HOST + ':'+ str(PORT))
-# sio.connect('http://876e10de0c24.ngrok.io')
 sio.wait()

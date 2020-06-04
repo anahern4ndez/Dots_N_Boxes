@@ -4,3 +4,5 @@ coordinator
 coordinator-admin
 .DS_Store
 .nvm
+.Python
+__pycache__
